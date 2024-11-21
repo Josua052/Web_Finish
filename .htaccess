@@ -1,0 +1,17 @@
+<IfModule mod_rewrite.c>
+# Aktifkan mod_rewrite
+RewriteEngine On
+
+# Atur pengalihan untuk error 404 ke index.php
+ErrorDocument 404 /coba-baru/index.php
+
+
+# Opsional: Redirect semua URL yang tidak ada ke index.php
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}.php -f [NC]
+
+RewriteRule ^(.*)$ /coba-baru/index.php [L,QSA]
+
+</IfModule>

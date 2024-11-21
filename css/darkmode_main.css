@@ -1,0 +1,162 @@
+body {
+    transition: background-color 0.3s, color 0.3s;
+    background-color: #ffffff;
+    color: #000000;
+    font-family: Arial, sans-serif;
+}
+
+
+/* Dark mode styles */
+
+body.dark-mode {
+    background-color: #121212;
+    color: #e0e0e0;
+}
+
+body.dark-mode nav {
+    background-color: #1c1c1c;
+    color: #ffffff;
+}
+
+body.dark-mode footer {
+    background: linear-gradient(to right, #1a1a1a, #333333, #4d4d4d);
+    color: #ffffff;
+}
+
+footer.dark-mode .footer-content {
+    background: none;
+}
+
+footer.dark-mode .layanan-pengaduan p {
+    color: #e0e0e0;
+}
+
+
+/* Aturan untuk Dark Mode */
+
+footer.dark-mode .phone i {
+    background-color: #333333;
+    /* Warna latar belakang gelap */
+    color: #ffffff;
+    /* Warna ikon menjadi putih */
+    transition: 0.4s;
+}
+
+footer.dark-mode .phone i:hover {
+    background-color: #555555;
+    /* Warna latar belakang saat hover */
+    color: #eeeeee;
+    /* Warna ikon saat hover */
+}
+
+footer.dark-mode .phone span {
+    color: #cccccc;
+}
+
+footer.dark-mode .logo-footer p {
+    color: #e0e0e0;
+}
+
+footer.dark-mode .copyright {
+    color: #cccccc;
+}
+
+.content {
+    text-align: center;
+    margin-top: 50px;
+}
+
+.toggle-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    margin-top: 20px;
+}
+
+#darkModeToggle {
+    display: none;
+}
+
+.toggle-label {
+    position: relative;
+    width: 60px;
+    height: 30px;
+    background-color: #ddd;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.toggle-ball {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 24px;
+    height: 24px;
+    background-color: white;
+    border-radius: 50%;
+    transition: transform 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sun-icon,
+.moon-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.sun-icon {
+    display: block;
+}
+
+.moon-icon {
+    display: none;
+}
+
+body.dark .sun-icon {
+    display: none;
+}
+
+body.dark .moon-icon {
+    display: block;
+}
+
+#darkModeToggle:checked+.toggle-label {
+    background-color: #4d4d4d;
+}
+
+#darkModeToggle:checked+.toggle-label .toggle-ball {
+    transform: translateX(30px);
+}
+
+.notification-box {
+    position: fixed;
+    bottom: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #089a5b;
+    color: white;
+    padding: 15px 30px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    z-index: 1000;
+    transition: all 0.5s ease-in-out;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+}
+
+.notification-box.show {
+    bottom: 30px;
+    opacity: 1;
+}
+
+.notification-box:hover {
+    background-color: #0eab65;
+    cursor: pointer;
+}
