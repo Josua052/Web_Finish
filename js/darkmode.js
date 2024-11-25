@@ -1,27 +1,38 @@
-const toggleSwitch = document.getElementById('darkModeToggle');
-const sunIcon = document.querySelector('.sun-icon');
-const moonIcon = document.querySelector('.moon-icon');
+document.addEventListener("DOMContentLoaded", () => {
+    const darkModeToggle = document.getElementById("darkModeToggle");
+    const body = document.body;
+    const sunIcons = document.querySelectorAll(".sun-icon");
+    const moonIcons = document.querySelectorAll(".moon-icon");
 
-if (localStorage.getItem('darkMode') === 'enabled') {
-    document.body.classList.add('dark-mode');
-    toggleSwitch.checked = true;
-    sunIcon.style.display = 'none';
-    moonIcon.style.display = 'block';
-} else {
-    sunIcon.style.display = 'block';
-    moonIcon.style.display = 'none';
-}
+    // Check and apply the saved theme from localStorage
+    const currentTheme = localStorage.getItem("theme");
+    if (currentTheme === "dark") {
+        body.classList.add("dark-mode");
+        darkModeToggle.checked = true;
+        toggleIcons("dark");
+    }
 
-toggleSwitch.addEventListener('change', () => {
-    document.body.classList.toggle('dark-mode');
+    // Add event listener for dark mode toggle
+    darkModeToggle.addEventListener("change", () => {
+        if (darkModeToggle.checked) {
+            body.classList.add("dark-mode");
+            localStorage.setItem("theme", "dark");
+            toggleIcons("dark");
+        } else {
+            body.classList.remove("dark-mode");
+            localStorage.setItem("theme", "light");
+            toggleIcons("light");
+        }
+    });
 
-    if (document.body.classList.contains('dark-mode')) {
-        localStorage.setItem('darkMode', 'enabled');
-        sunIcon.style.display = 'none';
-        moonIcon.style.display = 'block';
-    } else {
-        localStorage.removeItem('darkMode');
-        sunIcon.style.display = 'block';
-        moonIcon.style.display = 'none';
+    // Function to toggle between sun and moon icons
+    function toggleIcons(mode) {
+        if (mode === "dark") {
+            sunIcons.forEach(icon => (icon.style.display = "none"));
+            moonIcons.forEach(icon => (icon.style.display = "block"));
+        } else {
+            sunIcons.forEach(icon => (icon.style.display = "block"));
+            moonIcons.forEach(icon => (icon.style.display = "none"));
+        }
     }
 });

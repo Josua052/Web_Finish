@@ -95,15 +95,20 @@ if (isset($_POST['update_driver_id']) && isset($_POST['new_username'])) {
     // Proses penambahan bus baru
     if (isset($_POST['add_bus_plate_number'])) {
         $add_plate_number = $_POST['add_bus_plate_number'];
+        
         try {
             $stmt = $conn->prepare("INSERT INTO bus (plat_nomor) VALUES (:plat_nomor)");
             $stmt->bindParam(':plat_nomor', $add_plate_number);
             $stmt->execute();
-            echo "<script>alert('Bus baru berhasil ditambahkan'); window.location.href='index.php';</script>";
+
+            // Kirim respons JSON untuk SweetAlert
+            echo json_encode(['success' => true, 'message' => 'Bus baru berhasil ditambahkan']);
         } catch (PDOException $e) {
-            echo "Kesalahan: " . $e->getMessage();
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         }
+        exit();
     }
+
 
     // Proses penghapusan data bus
     if (isset($_POST['delete_bus_id'])) {
@@ -237,6 +242,16 @@ if (isset($_POST['update_driver_id']) && isset($_POST['new_username'])) {
         <!-- Tabel Data Bus -->
         <div id="busTable" class="table-container">
             <h3>Kelola Data Bus</h3>
+            <!-- Tombol untuk membuka form tambah bus -->
+            <button id="addBusButton" onclick="showAddBusForm()">Tambah Bus Baru</button>
+
+            <!-- Form tambah bus -->
+            <form id="addBusForm" style="display: none;">
+                <input type="text" id="add_bus_plate_number" placeholder="Plat Nomor Bus" required>
+                <button type="button" onclick="addBus()">Tambah</button>
+                <button type="button" onclick="cancelAddBus()">Batal</button>
+            </form>
+
             <table>
                 <thead>
                     <tr>
@@ -269,76 +284,116 @@ if (isset($_POST['update_driver_id']) && isset($_POST['new_username'])) {
     </div>
 </div>
     <script>
+       // Fungsi untuk menampilkan form tambah bus
+        function showAddBusForm() {
+            document.getElementById('addBusForm').style.display = 'block';
+            document.getElementById('addBusButton').style.display = 'none';
+        }
+
+        function cancelAddBus() {
+            document.getElementById('addBusForm').style.display = 'none';
+            document.getElementById('addBusButton').style.display = 'inline';
+        }
+
+        // Fungsi untuk menambah bus
+        function addBus() {
+            const plateNumber = document.getElementById('add_bus_plate_number').value;
+
+            if (plateNumber.trim() === '') {
+                Swal.fire('Error', 'Plat nomor bus tidak boleh kosong', 'error');
+                return;
+            }
+
+            fetch('index.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({ add_bus_plate_number: plateNumber })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire('Berhasil', data.message, 'success').then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire('Gagal', data.message, 'error');
+                }
+            })
+            .catch(error => {
+                Swal.fire('Error', 'Terjadi kesalahan saat menambah bus', 'error');
+            });
+        }
+
+
         function confirmDeleteDriver(driverId) {
-    Swal.fire({
-        title: 'Konfirmasi Penghapusan',
-        text: "Apakah Anda yakin ingin menghapus driver ini?",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Hapus',
-        cancelButtonText: 'Batal',
-        reverseButtons: true
-    }).then((result) => {
-        if (result.isConfirmed) {
-            fetch('', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `delete_driver_id=${driverId}`
-            })
-            .then(response => response.text())
-            .then(() => {
-                Swal.fire(
-                    'Berhasil!',
-                    'Driver berhasil dihapus.',
-                    'success'
-                ).then(() => location.reload());
-            })
-            .catch(() => {
-                Swal.fire(
-                    'Gagal!',
-                    'Terjadi kesalahan saat menghapus driver.',
-                    'error'
-                );
+            Swal.fire({
+                title: 'Konfirmasi Penghapusan',
+                text: "Apakah Anda yakin ingin menghapus driver ini?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Hapus',
+                cancelButtonText: 'Batal',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: `delete_driver_id=${driverId}`
+                    })
+                    .then(response => response.text())
+                    .then(() => {
+                        Swal.fire(
+                            'Berhasil!',
+                            'Driver berhasil dihapus.',
+                            'success'
+                        ).then(() => location.reload());
+                    })
+                    .catch(() => {
+                        Swal.fire(
+                            'Gagal!',
+                            'Terjadi kesalahan saat menghapus driver.',
+                            'error'
+                        );
+                    });
+                }
             });
         }
-    });
-}
 
-function confirmDeleteBus(busId) {
-    Swal.fire({
-        title: 'Konfirmasi Penghapusan',
-        text: "Apakah Anda yakin ingin menghapus bus ini?",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Hapus',
-        cancelButtonText: 'Batal',
-        reverseButtons: true
-    }).then((result) => {
-        if (result.isConfirmed) {
-            fetch('', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `delete_bus_id=${busId}`
-            })
-            .then(response => response.text())
-            .then(() => {
-                Swal.fire(
-                    'Berhasil!',
-                    'Bus berhasil dihapus.',
-                    'success'
-                ).then(() => location.reload());
-            })
-            .catch(() => {
-                Swal.fire(
-                    'Gagal!',
-                    'Terjadi kesalahan saat menghapus bus.',
-                    'error'
-                );
+        function confirmDeleteBus(busId) {
+            Swal.fire({
+                title: 'Konfirmasi Penghapusan',
+                text: "Apakah Anda yakin ingin menghapus bus ini?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Hapus',
+                cancelButtonText: 'Batal',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: `delete_bus_id=${busId}`
+                    })
+                    .then(response => response.text())
+                    .then(() => {
+                        Swal.fire(
+                            'Berhasil!',
+                            'Bus berhasil dihapus.',
+                            'success'
+                        ).then(() => location.reload());
+                    })
+                    .catch(() => {
+                        Swal.fire(
+                            'Gagal!',
+                            'Terjadi kesalahan saat menghapus bus.',
+                            'error'
+                        );
+                    });
+                }
             });
         }
-    });
-}
-
 
 
         function showUpdateBusForm(busId, platNomor) {
@@ -353,57 +408,57 @@ function confirmDeleteBus(busId) {
         }
 
         function updateDriver(driverId, currentUsername) {
-    Swal.fire({
-        title: 'Perbarui Username',
-        input: 'text',
-        inputLabel: 'Masukkan username baru:',
-        inputValue: currentUsername,
-        showCancelButton: true,
-        confirmButtonText: 'Lanjut',
-        cancelButtonText: 'Batal',
-        inputValidator: (value) => {
-            if (!value) {
-                return 'Username tidak boleh kosong!';
-            }
-        }
-    }).then((inputResult) => {
-        if (inputResult.isConfirmed) {
-            const newUsername = inputResult.value;
-
             Swal.fire({
-                title: "Apakah Anda ingin menyimpan perubahan?",
-                showDenyButton: true,
+                title: 'Perbarui Username',
+                input: 'text',
+                inputLabel: 'Masukkan username baru:',
+                inputValue: currentUsername,
                 showCancelButton: true,
-                confirmButtonText: "Simpan",
-                denyButtonText: "Jangan simpan"
-            }).then((confirmResult) => {
-                if (confirmResult.isConfirmed) {
-                    // Kirim data ke server melalui fetch
-                    fetch('', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                        body: `update_driver_id=${driverId}&new_username=${encodeURIComponent(newUsername)}`
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            Swal.fire("Berhasil!", data.message, "success").then(() => {
-                                location.reload(); // Muat ulang halaman setelah SweetAlert selesai
+                confirmButtonText: 'Lanjut',
+                cancelButtonText: 'Batal',
+                inputValidator: (value) => {
+                    if (!value) {
+                        return 'Username tidak boleh kosong!';
+                    }
+                }
+            }).then((inputResult) => {
+                if (inputResult.isConfirmed) {
+                    const newUsername = inputResult.value;
+
+                    Swal.fire({
+                        title: "Apakah Anda ingin menyimpan perubahan?",
+                        showDenyButton: true,
+                        showCancelButton: true,
+                        confirmButtonText: "Simpan",
+                        denyButtonText: "Jangan simpan"
+                    }).then((confirmResult) => {
+                        if (confirmResult.isConfirmed) {
+                            // Kirim data ke server melalui fetch
+                            fetch('', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                body: `update_driver_id=${driverId}&new_username=${encodeURIComponent(newUsername)}`
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    Swal.fire("Berhasil!", data.message, "success").then(() => {
+                                        location.reload(); // Muat ulang halaman setelah SweetAlert selesai
+                                    });
+                                } else {
+                                    Swal.fire("Gagal!", data.message, "error");
+                                }
+                            })
+                            .catch(error => {
+                                Swal.fire("Error!", "Terjadi kesalahan dalam pengiriman data.", "error");
                             });
-                        } else {
-                            Swal.fire("Gagal!", data.message, "error");
+                        } else if (confirmResult.isDenied) {
+                            Swal.fire("Perubahan tidak disimpan", "", "info");
                         }
-                    })
-                    .catch(error => {
-                        Swal.fire("Error!", "Terjadi kesalahan dalam pengiriman data.", "error");
                     });
-                } else if (confirmResult.isDenied) {
-                    Swal.fire("Perubahan tidak disimpan", "", "info");
                 }
             });
         }
-    });
-}
 
 
     function updateBus(busId, currentPlatNomor) {
